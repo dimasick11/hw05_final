@@ -10,18 +10,22 @@ from .forms import PostForm, CommentForm
 @cache_page(20)
 def index(request):
     post_list = Post.objects.order_by('-pub_date').all()
+
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
+
     return render(request, 'index.html', {'page': page, 'paginator': paginator, })
 
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     posts = Post.objects.filter(group=group).order_by('-pub_date').all()
+
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
+
     return render(request, 'group.html', {'group': group, 'page': page, 'paginator': paginator})
 
 
@@ -36,6 +40,7 @@ def profile(request, username):
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
+
     return render(request, 'profile.html', {'page': page, 'paginator': paginator,
                                             'profile_user': user, 'count_post': count_post, 'following': following,
                                             'follow_count': follow_count})
@@ -51,6 +56,7 @@ def post_view(request, username, post_id):
 
     comments = Comment.objects.filter(post_id=post_id).order_by('-created')
     comment_form = CommentForm()
+
     return render(request, 'post.html',
                   {'profile_user': user, 'post': post, 'count_post': count_post, 'form': comment_form,
                    'items': comments, 'following': following, 'follow_count': follow_count})
@@ -71,6 +77,7 @@ def post_edit(request, username, post_id):
 
     if not request.user == user:
         return redirect('post', username, post_id)
+
     form = PostForm(request.POST or None, files=request.FILES or None, instance=post)
 
     if request.method == 'POST':
@@ -89,10 +96,8 @@ def new_post(request):
         if not form.is_valid():
             return render(request, 'post_new.html', {'form': form})
 
-        text = form.cleaned_data['text']
-        group = form.cleaned_data['group']
-        image = form.cleaned_data['image']
-        Post.objects.create(author=request.user, text=text, group=group, image=image)
+        form.instance.author = request.user
+        form.save()
 
         return redirect('index')
 
@@ -107,16 +112,18 @@ def add_comment(request, username, post_id):
 
         if not form.is_valid():
             return redirect('post', username, post_id)
-        text = form.cleaned_data['text']
-        Comment.objects.create(post_id=post_id, author=request.user, text=text)
+
+        form.instance.author = request.user
+        form.instance.post_id = post_id
+        form.save()
 
     return redirect('post', username, post_id)
 
 
 @login_required
 def follow_index(request):
-    follow = Follow.objects.filter(user=request.user)
-    post_list = Post.objects.filter(author__in=follow.values('author')).order_by('-pub_date')
+    follow_authors = Follow.objects.filter(user=request.user).values('author')
+    post_list = Post.objects.filter(author__in=follow_authors).order_by('-pub_date')
 
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get('page')
@@ -128,19 +135,17 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     user = get_object_or_404(User, username=username)
-    if not user == request.user:
-        if Follow.objects.filter(user=request.user, author=user).count() == 0:
-            Follow.objects.create(user=request.user, author=user)
-            return redirect('profile', username)
+    if user != request.user:
+        Follow.objects.get_or_create(user=request.user, author=user)
+
     return redirect('profile', username)
 
 
 @login_required
 def profile_unfollow(request, username):
     user = get_object_or_404(User, username=username)
-    if not user == request.user:
-        if Follow.objects.filter(user=request.user, author=user).count() > 0:
-            follow = Follow.objects.filter(user=request.user, author=user)
-            follow.delete()
-            return redirect('profile', username)
+    if user != request.user:
+        follow = Follow.objects.filter(user=request.user, author=user)
+        follow.delete()
+
     return redirect('profile', username)

@@ -3,18 +3,18 @@
 {% block title %} Записи сообщества {{ group.title }} {% endblock %}
 {% block content %}
     <h1>
-       {{ group.title }}
+        {{ group.title }}
     </h1>
+
     <p>
-       {{ group.description }}
+        {{ group.description }}
     </p>
 
-  {% for post in page %}
+    {% for post in page %}
         {% include "post_item.html" with post=post %}
-  {% endfor %}
+    {% endfor %}
 
-   {% if page.has_other_pages %}
+    {% if page.has_other_pages %}
         {% include 'paginator.html' with items=page paginator=paginator %}
    {% endif %}
-
 {% endblock %}

@@ -1,48 +1,46 @@
 <div class="col-md-3 mb-3 mt-1">
-                        <div class="card">
-                                <div class="card-body">
-                                        <div class="h2">
-                                            <!-- Имя автора -->
-                                            {{ profile_user.get_full_name }}
-                                        </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="h2">
+                {{ profile_user.get_full_name }}
+            </div>
 
-                                        <div class="h3 text-muted">
-                                             <!-- username автора -->
-                                             <a href="{% url 'profile' username=profile_user.username %}">@{{ profile_user.username }}</a>
-                                        </div>
+            <div class="h3 text-muted">
+                <a href="{% url 'profile' username=profile_user.username %}">@{{ profile_user.username }}</a>
+            </div>
+        </div>
 
-
-                                </div>
-                                <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">
-                                                <div class="h6 text-muted">
-                                                Подписчиков: {{ following }} <br />
-                                                Подписан: {{ follow_count }}
-                                                </div>
-                                        </li>
-
-                                        <li class="list-group-item">
-                                                <div class="h6 text-muted">
-                                                    Записей: {{ count_post }}
-                                                </div>
-                                        </li>
-                                    {% if user.is_authenticated %}
-                                        {% if not profile_user == user %}
-                                            <li class="list-group-item">
-                                                {% if following %}
-                                                    <a class = "btn btn-lg btn-light"
-                                                       href="{% url 'profile_unfollow' profile_user.username %}" role="button">
-                                                       Отписаться
-                                                    </a>
-                                                {% else %}
-                                                    <a class="btn btn-lg btn_primary"
-                                                       href="{% url 'profile_follow' profile_user.username %}" role="button">
-                                                        Подписаться
-                                                    </a>
-                                                {% endif %}
-                                            </li>
-                                        {% endif %}
-                                    {% endif %}
-                                </ul>
-                        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                <div class="h6 text-muted">
+                    Подписчиков: {{ following }} <br />
+                    Подписан: {{ follow_count }}
                 </div>
+            </li>
+
+            <li class="list-group-item">
+                <div class="h6 text-muted">
+                    Записей: {{ count_post }}
+                </div>
+            </li>
+
+            {% if user.is_authenticated %}
+                {% if not profile_user == user %}
+                    <li class="list-group-item">
+                        {% if following %}
+                            <a class = "btn btn-lg btn-light"
+                               href="{% url 'profile_unfollow' profile_user.username %}" role="button">
+                                Отписаться
+                            </a>
+                        {% else %}
+                            <a class="btn btn-lg btn_primary"
+                               href="{% url 'profile_follow' profile_user.username %}" role="button">
+                                Подписаться
+                            </a>
+                        {% endif %}
+                    </li>
+                {% endif %}
+            {% endif %}
+        </ul>
+    </div>
+</div>
