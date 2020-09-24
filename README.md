@@ -7,6 +7,7 @@
 * Django
 * Pytest
 * Pillow
+* Bootstrap
 
 #### **Установка:**
 1. Выполнить `pip install -r requirements.txt`
